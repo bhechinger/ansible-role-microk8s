@@ -14,6 +14,21 @@
     - microk8s.ha
     - microk8s.ha.hosts
 
+- name:  Enumerate all cluster hosts within the hosts file (cloud-init edition)
+  ansible.builtin.blockinfile:
+    dest: /etc/cloud/templates/hosts.debian.tmpl
+    marker: "# {mark} ANSIBLE MANAGED: microk8s HA Cluster Hosts"
+    # yamllint disable rule:line-length
+    content: |
+      {% for host in groups[microk8s_group_ha] %}
+      {{ hostvars[host].ansible_default_ipv4.address }} {{ hostvars[host].ansible_hostname }}
+      {% endfor %}
+    # yamllint enable rule:line-length
+  tags:
+    - microk8s
+    - microk8s.ha
+    - microk8s.ha.hosts
+
 - name: Set master var on all hosts
   set_fact:
     microk8s_master: "{{ inventory_hostname }}"
